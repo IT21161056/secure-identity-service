@@ -1,9 +1,15 @@
+// database/database.module.ts
 import { Module } from '@nestjs/common';
-import { DatabaseController } from './database.controller';
-import { DatabaseService } from './database.service';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  controllers: [DatabaseController],
-  providers: [DatabaseService],
+  imports: [
+    MongooseModule.forRootAsync({
+      useFactory: () => ({
+        uri: process.env.MONGODB_URI,
+      }),
+    }),
+  ],
+  exports: [MongooseModule],
 })
 export class DatabaseModule {}

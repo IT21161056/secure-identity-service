@@ -7,12 +7,13 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
 const { logger } = require("./middleware/logger");
-const { corsOptions } = require("./config/corsOptions");
+const corsOptions = require("./config/corsOptions");
 const connectMongoDb = require("./config/dbConnection");
 const errorMiddleware = require("./middleware/errorMiddleware");
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5016;
@@ -51,6 +52,7 @@ app.use(logger);
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
@@ -96,6 +98,10 @@ app.get(`${BASE_URL}`, (req, res) => {
     message: "API is running",
   });
 });
+
+// Endpoints
+app.use(`${BASE_URL}/auth`, authRoutes);
+app.use(`${BASE_URL}/user`, userRoutes);
 
 app.all("*", (req, res) => {
   res.status(404);

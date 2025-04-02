@@ -1,45 +1,80 @@
 const jwt = require("jsonwebtoken");
-const User = require("../model/UserModel");
-const { CustomError } = require("../exceptions/baseException");
+const asyncHandler = require("express-async-handler");
+const User = require("../models/user.model");
 
-const protect = async (req, res, next) => {
-  let token;
+/**
+ * Middleware to protect routes - verifies token and loads user data
+ */
+const protect = asyncHandler(async (req, res, next) => {
+  let token = "";
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  }
+
+  if (!token) {
+    res.status(401);
+    throw new Error("Not authorized, no token");
+  }
 
   try {
-    token = req.cookies.jwt;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // checks token expiration time
 
-    if (!token) {
-      throw new CustomError("Not authorized, no token", 401);
+    const user = await User.findById(decoded.user.id).select("-password");
+
+    if (!user) {
+      res.status(401);
+      throw new Error("Not authorized, user not found");
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Token verification error:", error.message); // Log the specific error
 
-    req.user = await User.findById(decoded.userId).select("-password");
+    let message = "Not authorized, token failed";
+    if (error.name === "TokenExpiredError") {
+      message = "Not authorized, token expired";
+    } else if (error.name === "JsonWebTokenError") {
+      message = "Not authorized, invalid token";
+    }
 
+    res.status(401).json({
+      success: false,
+      message: message,
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * Middleware to authorize users based on role
+ * @param {...String} roles - Roles allowed to access the route
+ */
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
     if (!req.user) {
-      throw new CustomError("Unauthorized, user not found", 401);
+      res.status(401);
+      throw new Error("User not authenticated");
+    }
+
+    if (!roles.includes(req.user.role)) {
+      res.status(403);
+      throw new Error(
+        `Role (${req.user.role}) is not authorized to access this resource`
+      );
     }
 
     next();
-  } catch (error) {
-    next(error);
-  }
-};
-
-const checkRole = (myRole) => {
-  return async (req, res, next) => {
-    try {
-      if (!req.role || req.role !== myRole) {
-        throw new CustomError(`Access denied, ${myRole} role required`, 403);
-      }
-      next();
-    } catch (error) {
-      next(error);
-    }
   };
 };
 
 module.exports = {
   protect,
-  checkRole,
+  authorizeRoles,
 };

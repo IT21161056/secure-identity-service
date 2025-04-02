@@ -1,11 +1,11 @@
-const { format } = require("date-fns");
-const { v4: uuid } = require("uuid");
 const fs = require("fs");
-const { promises: fsPromises } = require("fs");
 const path = require("path");
+const { v4: uuid } = require("uuid");
+const { format } = require("date-fns");
+const { promises: fsPromises } = require("fs");
 
 const logEvents = async (message, logFileName) => {
-  const dateTime = `${format(new Date(), "yyyyMMdd\tHH:mm:ss")}`;
+  const dateTime = `${format(new Date(), "yyyy-MM-dd\tHH:mm:ss")}`;
   const logItem = `${dateTime}\t${uuid()}\t${message}\n`;
 
   try {
@@ -20,12 +20,19 @@ const logEvents = async (message, logFileName) => {
 };
 
 const logger = (req, res, next) => {
-  logEvents(`${req.method}\t${req.url}\t${req.get("origin")}`, "reqLog.log");
-  console.log(`${req.method} ${req.path}`);
+  const clientOrigin =
+    req.headers.origin || req.get("referer") || "direct-access";
+  const clientIP = req.ip || req.connection.remoteAddress;
+
+  logEvents(
+    `${req.method}\t${req.url}\t${clientOrigin}\t${clientIP}`,
+    "reqLog.log"
+  );
+
   next();
 };
 
 module.exports = {
-  logEvents,
   logger,
+  logEvents,
 };

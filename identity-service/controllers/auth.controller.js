@@ -1,40 +1,10 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
-
-const accessTokenExpiresIn = "15m";
-const refreshTokenExpiresIn = "7d";
-
-function createAccessToken(user, token) {
-  return jwt.sign(
-    {
-      UserInfo: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        nic: user.nic,
-        phone: user.phone,
-        role: user.role,
-      },
-    },
-    token,
-    { expiresIn: accessTokenExpiresIn }
-  );
-}
-
-function createRefreshToken(user, token) {
-  return jwt.sign(
-    {
-      email: user.email,
-      id: user._id,
-    },
-    token,
-    {
-      expiresIn: refreshTokenExpiresIn,
-    }
-  );
-}
+const {
+  createAccessToken,
+  createRefreshToken,
+} = require("../utils/generateToken");
 
 // @desc Login
 // @route POST /auth
@@ -43,19 +13,22 @@ const login = asyncHandler(async (req, res) => {
   const { password, email } = req.body;
 
   if (!email || !password) {
-    throw new CustomError("Email and password are required", 400);
+    res.status(400);
+    throw new Error("Email and password are required");
   }
 
   const foundUser = await User.findOne({ email }).exec();
 
   if (!foundUser) {
-    throw new CustomError("Invalid email or password", 401);
+    res.status(401);
+    throw new Error("Invalid email or password");
   }
 
   const isPasswordValid = await foundUser.matchPassword(password);
 
   if (!isPasswordValid) {
-    throw new CustomError("Invalid email or password", 401);
+    res.status(401);
+    throw new Error("Invalid email or password");
   }
 
   const accessToken = createAccessToken(
@@ -70,15 +43,14 @@ const login = asyncHandler(async (req, res) => {
 
   // Create secure cookie with refresh token
   res.cookie("refreshToken", refreshToken, {
-    httpOnly: true, //accessible only by web server
-    secure: true, //https
-    sameSite: "None", //cross-site cookie
-    maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match rT
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  // Exclude password from the user data sent to client
   const userResponse = {
-    _id: foundUser._id,
+    id: foundUser._id,
     firstName: foundUser.firstName,
     lastName: foundUser.lastName,
     email: foundUser.email,
@@ -95,44 +67,61 @@ const login = asyncHandler(async (req, res) => {
 // @desc Refresh
 // @route GET /auth/refresh
 // @access Public - because access token has expired
-const refresh = (req, res) => {
+const refresh = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
-  if (!refreshToken) throw new CustomError("Refresh token required", 401);
+  if (!refreshToken) {
+    res.status(401);
+    throw new Error("Refresh token required");
+  }
 
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET,
-    asyncHandler(async (err, decoded) => {
-      if (err) throw new CustomError("Invalid refresh token", 403);
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const foundUser = await User.findById(decoded.id).exec();
 
-      const foundUser = await User.findById(decoded.id).exec();
+    if (!foundUser) {
+      res.status(404);
+      throw new Error("User not found");
+    }
 
-      if (!foundUser) throw new CustomError("User not found", 404);
+    const newAccessToken = createAccessToken(
+      foundUser,
+      process.env.ACCESS_TOKEN_SECRET
+    );
 
-      const newAccessToken = createAccessToken(
-        foundUser,
-        process.env.ACCESS_TOKEN_SECRET
-      );
-
-      res.json({ accessToken: newAccessToken });
-    })
-  );
-};
+    res.status(200).json({
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    res.status(403);
+    throw new Error("Invalid refresh token");
+  }
+});
 
 // @desc Logout
 // @route POST /auth/logout
 // @access Public - just to clear cookie if exists
-const logout = (req, res) => {
+const logout = asyncHandler(async (req, res) => {
   const cookies = req.cookies;
-  if (!cookies?.refreshToken) return res.sendStatus(204); //No content
+
+  if (!cookies?.refreshToken) {
+    return res.status(204).json({
+      success: true,
+      message: "No content",
+    });
+  }
+
   res.clearCookie("refreshToken", {
     httpOnly: true,
     sameSite: "None",
     secure: true,
   });
-  res.json({ message: "Refresh token cookie cleared" });
-};
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});
 
 module.exports = {
   login,

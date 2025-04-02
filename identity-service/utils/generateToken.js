@@ -1,18 +1,38 @@
 const jwt = require("jsonwebtoken");
+const {
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+} = require("./constants");
 
-const generateToken = (res, userId) => {
-  console.log("process.env.JWT_SECRET >>", process.env.JWT_SECRET);
-  //create the token
-  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
-  //save the token in a cookie
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== "development",
-    sameSite: "strict",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-  });
+const createAccessToken = (user, token) => {
+  return jwt.sign(
+    {
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        nic: user.nic,
+        phone: user.phone,
+        role: user.role,
+      },
+    },
+    token,
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
+  );
 };
 
-module.exports = generateToken;
+const createRefreshToken = (user, token) => {
+  return jwt.sign(
+    {
+      email: user.email,
+      id: user._id,
+    },
+    token,
+    {
+      expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+    }
+  );
+};
+
+module.exports = { createAccessToken, createRefreshToken };

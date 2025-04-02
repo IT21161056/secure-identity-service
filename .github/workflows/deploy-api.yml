@@ -1,4 +1,4 @@
-name: Deploy Node API to OceanGate
+name: Deploy Node API to DigitalOcean
 
 on:
   workflow_dispatch:

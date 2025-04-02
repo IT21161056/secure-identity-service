@@ -1,0 +1,56 @@
+name: Deploy Node API to OceanGate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - development
+    # paths:
+    #   - identity-service/**
+    #   - .github/workflows/deploy-api.yml
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Navigate to API folder and install dependencies
+        working-directory: ./identity-service # Change to your API folder
+        run: npm install
+
+      - name: Build the API (if needed)
+        working-directory: ./identity-service
+        run: npm run build # Update with your build command if applicable
+
+
+      # - name: Login to OceanGate Container Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: registry.oceangate.com # Update with your OceanGate registry URL
+      #     username: ${{ secrets.OCEANGATE_USERNAME }}
+      #     password: ${{ secrets.OCEANGATE_PASSWORD }}
+
+      # - name: Build and push Docker image
+      #   working-directory: ./api-service
+      #   run: |
+      #     # Update with your actual Docker build and push commands
+      #     docker build -t registry.oceangate.com/your-namespace/api-service:${{ github.sha }} .
+      #     docker push registry.oceangate.com/your-namespace/api-service:${{ github.sha }}
+
+      #     # Optionally tag as 'latest' as well
+      #     docker tag registry.oceangate.com/your-namespace/api-service:${{ github.sha }} registry.oceangate.com/your-namespace/api-service:latest
+      #     docker push registry.oceangate.com/your-namespace/api-service:latest
+
+      # Optional: Add deployment steps if you need to update your Kubernetes or other orchestration
+      # - name: Deploy to Kubernetes
+      #   run: |
+      #     kubectl set image deployment/api-service api-service=registry.oceangate.com/your-namespace/api-service:${{ github.sha }}

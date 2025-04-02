@@ -1,4 +1,4 @@
-name: Deploy Node API to Digital Ocean
+name: Deploy Node API to DigitalOcean
 
 on:
   workflow_dispatch:

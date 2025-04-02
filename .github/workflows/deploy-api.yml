@@ -5,9 +5,6 @@ on:
   push:
     branches:
       - development
-    # paths:
-    #   - identity-service/**
-    #   - .github/workflows/deploy-api.yml
 
 jobs:
   build-and-deploy:
@@ -27,30 +24,37 @@ jobs:
         working-directory: ./identity-service # Change to your API folder
         run: npm install
 
+      - name: Create .env file from GitHub Secrets
+        run: |
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./identity-service/.env
+          echo "MONGO_URL=${{ secrets.MONGO_URL }}" >> ./identity-service/.env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> ./identity-service/.env
+          echo "PORT=${{ secrets.PORT }}" >> ./identity-service/.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./identity-service/.env
+          echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" >> ./identity-service/.env
+          echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> ./identity-service/.env
+
       - name: Build the API (if needed)
         working-directory: ./identity-service
         run: npm run start # Update with your build command if applicable
 
 
-      # - name: Login to OceanGate Container Registry
+      # - name: Build Docker image
+      #   working-directory: ./identity-service
+      #   run: |
+      #     docker build -t your-dockerhub-username/identity-service:${{ github.sha }} .
+
+      # - name: Login to DockerHub
       #   uses: docker/login-action@v3
       #   with:
-      #     registry: registry.oceangate.com # Update with your OceanGate registry URL
-      #     username: ${{ secrets.OCEANGATE_USERNAME }}
-      #     password: ${{ secrets.OCEANGATE_PASSWORD }}
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # - name: Build and push Docker image
-      #   working-directory: ./api-service
+      # - name: Push Docker image
+      #   working-directory: ./identity-service
       #   run: |
-      #     # Update with your actual Docker build and push commands
-      #     docker build -t registry.oceangate.com/your-namespace/api-service:${{ github.sha }} .
-      #     docker push registry.oceangate.com/your-namespace/api-service:${{ github.sha }}
+      #     docker push your-dockerhub-username/identity-service:${{ github.sha }}
 
-      #     # Optionally tag as 'latest' as well
-      #     docker tag registry.oceangate.com/your-namespace/api-service:${{ github.sha }} registry.oceangate.com/your-namespace/api-service:latest
-      #     docker push registry.oceangate.com/your-namespace/api-service:latest
-
-      # Optional: Add deployment steps if you need to update your Kubernetes or other orchestration
-      # - name: Deploy to Kubernetes
+      # - name: Deploy to server (if applicable)
       #   run: |
-      #     kubectl set image deployment/api-service api-service=registry.oceangate.com/your-namespace/api-service:${{ github.sha }}
+      #     ssh user@your-server "docker pull your-dockerhub-username/identity-service:${{ github.sha }} && docker stop api-container || true && docker rm api-container || true && docker run --env-file /path/to/.env -d --name api-container -p 5000:5000 your-dockerhub-username/identity-service:${{ github.sha }}"

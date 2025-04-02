@@ -21,7 +21,7 @@ jobs:
           node-version: 20
 
       - name: Navigate to API folder and install dependencies
-        working-directory: ./identity-service # Change to your API folder
+        working-directory: ./identity-service
         run: npm install
 
       - name: Create .env file from GitHub Secrets

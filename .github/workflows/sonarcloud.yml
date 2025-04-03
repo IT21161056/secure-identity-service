@@ -20,15 +20,17 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./identity-service
-        run: npm install
+        run: npm ci
 
       - name: Run tests and coverage
+        working-directory: ./identity-service
         run: |
           npm test
           npm run coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
+        working-directory: ./identity-service
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

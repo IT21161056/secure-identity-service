@@ -9,34 +9,29 @@ const User = require("../models/user.model");
 const createUser = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, nic, phone, password, role } = req.body;
 
-  // Check if all required fields are provided
   if (!firstName || !lastName || !email || !nic || !phone || !password) {
     res.status(400);
     throw new Error("All fields are required");
   }
 
-  // Validate role if provided
   const validRoles = ["student", "user", "lecturer", "admin"];
   if (role && !validRoles.includes(role)) {
     res.status(400);
     throw new Error("Invalid role provided");
   }
 
-  // Check if email already exists
   const emailExists = await User.findOne({ email });
   if (emailExists) {
     res.status(400);
     throw new Error("Email already exists");
   }
 
-  // Check if NIC already exists
   const nicExists = await User.findOne({ nic });
   if (nicExists) {
     res.status(400);
     throw new Error("NIC already exists");
   }
 
-  // Create user object
   const userObject = {
     firstName,
     lastName,
@@ -44,14 +39,12 @@ const createUser = asyncHandler(async (req, res) => {
     nic,
     phone,
     password,
-    role: role || "student", // default to 'student' if role not provided
+    role: role || "student",
   };
 
-  // Create new user
   const user = await User.create(userObject);
 
   if (user) {
-    // Return user without password
     res.status(201).json({
       success: true,
       message: `User ${user.firstName} ${user.lastName} created successfully`,
@@ -78,22 +71,35 @@ const createUser = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const getAllUsers = asyncHandler(async (req, res) => {
-  const { email, role } = req.query;
+  const { search, email, role, firstName, lastName } = req.query;
   let query = {};
 
-  // Filter by email if provided
   if (email) {
     query.email = { $regex: new RegExp(email, "i") };
   }
 
-  // Filter by role if provided
   if (role) {
     query.role = role;
   }
 
-  // Get all users with the query
+  if (firstName) {
+    query.firstName = { $regex: new RegExp(firstName, "i") };
+  }
+
+  if (lastName) {
+    query.lastName = { $regex: new RegExp(lastName, "i") };
+  }
+
+  if (search) {
+    query.$or = [
+      { firstName: { $regex: new RegExp(search, "i") } },
+      { lastName: { $regex: new RegExp(search, "i") } },
+      { email: { $regex: new RegExp(search, "i") } },
+    ];
+  }
+
   const users = await User.find(query)
-    .select("-password")
+    .select("-password -__v")
     .sort({ createdAt: -1 });
 
   res.status(200).json({
@@ -131,7 +137,6 @@ const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { firstName, lastName, email, nic, phone, role, password } = req.body;
 
-  // Find user by id
   const user = await User.findById(id);
 
   if (!user) {
@@ -139,7 +144,6 @@ const updateUser = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  // Check if at least one field is provided for update
   if (
     !firstName &&
     !lastName &&
@@ -153,7 +157,6 @@ const updateUser = asyncHandler(async (req, res) => {
     throw new Error("Please provide at least one field to update");
   }
 
-  // Check email uniqueness if email is being updated
   if (email && email !== user.email) {
     const emailExists = await User.findOne({ email });
     if (emailExists) {
@@ -162,7 +165,6 @@ const updateUser = asyncHandler(async (req, res) => {
     }
   }
 
-  // Check NIC uniqueness if NIC is being updated
   if (nic && nic !== user.nic) {
     const nicExists = await User.findOne({ nic });
     if (nicExists) {
@@ -171,7 +173,6 @@ const updateUser = asyncHandler(async (req, res) => {
     }
   }
 
-  // Prepare update data
   const updateData = {};
   if (firstName) updateData.firstName = firstName;
   if (lastName) updateData.lastName = lastName;
@@ -181,7 +182,6 @@ const updateUser = asyncHandler(async (req, res) => {
   if (role) updateData.role = role;
   if (password) updateData.password = password;
 
-  // Update user
   const updatedUser = await User.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true,
@@ -256,7 +256,6 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
 
   const { firstName, lastName, email, nic, phone, password } = req.body;
 
-  // Check if email already exists and it's not the current user's email
   if (email && email !== user.email) {
     const emailExists = await User.findOne({ email });
     if (emailExists) {
@@ -265,7 +264,6 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
     }
   }
 
-  // Check if NIC already exists and it's not the current user's NIC
   if (nic && nic !== user.nic) {
     const nicExists = await User.findOne({ nic });
     if (nicExists) {
@@ -274,7 +272,6 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
     }
   }
 
-  // Update user fields
   if (firstName) user.firstName = firstName;
   if (lastName) user.lastName = lastName;
   if (email) user.email = email;

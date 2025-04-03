@@ -19,6 +19,7 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
+        working-directory: ./identity-service
         run: npm install
 
       - name: Run tests and coverage

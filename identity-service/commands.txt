@@ -1,1 +1,6 @@
 docker run --env-file .env -p 5000:5000 your-docker-username/identity-service:latest
+
+
+sonar token 
+key - GitHub Actions Token 
+value - 97ae362ea45fd346a9b89a7463593611b0b61d95

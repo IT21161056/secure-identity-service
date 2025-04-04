@@ -11,7 +11,7 @@ const corsOptions = require("./config/corsOptions");
 const connectMongoDb = require("./config/dbConnection");
 const errorMiddleware = require("./middleware/errorMiddleware");
 
-// Routes
+// auth Routes
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 

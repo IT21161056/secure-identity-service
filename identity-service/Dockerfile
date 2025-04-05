@@ -1,30 +1,18 @@
-FROM node:20-alpine
+# Use official Node.js image
+FROM node:18
 
-WORKDIR /app
+# Create app directory
+WORKDIR /usr/src/app
 
-# Copy package files first for better layer caching
+# Install app dependencies
 COPY package*.json ./
+RUN npm install
 
-# Install production dependencies only
-RUN npm ci 
-
-# Copy application files (excluding what's in .dockerignore)
+# Copy app source code
 COPY . .
 
-# Environment variables for non-sensitive configuration
-ENV NODE_ENV=production
-ENV PORT=5000
-ENV API_BASE_URL=/api/v1
-
-# Runtime port exposure
+# Expose port
 EXPOSE 5000
 
-# Health check (optional but recommended)
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD node healthcheck.js || exit 1
-
-# Run as non-root user for security
-USER node
-
-# Start the application
-CMD ["npm", "run", "start"]
+# Start the app
+CMD ["npm", "start"]

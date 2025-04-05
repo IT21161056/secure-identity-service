@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
-const asyncHandler = require("express-async-handler");
-const User = require("../models/user.model");
+import jwt from "jsonwebtoken";
+import asyncHandler from "express-async-handler";
+import User from "../models/user.model.js";
 
 /**
  * Middleware to protect routes - verifies token and loads user data
@@ -74,7 +74,4 @@ const authorizeRoles = (...roles) => {
   };
 };
 
-module.exports = {
-  protect,
-  authorizeRoles,
-};
+export { protect, authorizeRoles };

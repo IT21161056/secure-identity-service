@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { login, refresh, logout } = require("../controllers/auth.controller");
+import { login, refresh, logout } from "../controllers/auth.controller.js";
 
 /**
  * @swagger
@@ -115,4 +115,4 @@ router.route("/refresh").post(refresh);
  */
 router.route("/logout").post(logout);
 
-module.exports = router;
+export default router;

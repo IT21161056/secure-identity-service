@@ -40,4 +40,4 @@ jobs:
 
       - name: Redeploy Azure Container Instance
         run: |
-          az container restart --name ${{ secrets.ACI_NAME }} --resource-group ${{ secretes.RESOURCE_GROUP }}
+          az container restart --name ${{ secrets.ACI_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }}

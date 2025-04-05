@@ -1,10 +1,10 @@
-const User = require("../models/user.model");
-const jwt = require("jsonwebtoken");
-const asyncHandler = require("express-async-handler");
-const {
+import User from "../models/user.model.js";
+import jwt from "jsonwebtoken";
+import asyncHandler from "express-async-handler";
+import {
   createAccessToken,
   createRefreshToken,
-} = require("../utils/generateToken");
+} from "../utils/generateToken.js";
 
 // @desc Login
 // @route POST /auth
@@ -123,8 +123,4 @@ const logout = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
-  login,
-  refresh,
-  logout,
-};
+export { login, refresh, logout };

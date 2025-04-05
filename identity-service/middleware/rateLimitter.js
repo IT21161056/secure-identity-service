@@ -1,5 +1,5 @@
-const rateLimit = require("express-rate-limit");
-const { logEvents } = require("./logger");
+import rateLimit from "express-rate-limit";
+import { logEvents } from "./logger.js";
 
 // API Rate limitter functionality
 
@@ -22,4 +22,4 @@ const rateLimitter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = rateLimitter;
+export default rateLimitter;

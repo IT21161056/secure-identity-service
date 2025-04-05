@@ -4,5 +4,4 @@ const allowedOrigins = [
   "https://yourproductiondomain.com",
   "https://www.yourproductiondomain.com",
 ];
-
-module.exports = allowedOrigins;
+export default allowedOrigins;

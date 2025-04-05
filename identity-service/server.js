@@ -1,19 +1,25 @@
-require("dotenv").config();
-const path = require("path");
-const cors = require("cors");
-const express = require("express");
-const rootRoute = require("./routes/root");
-const swaggerJsDoc = require("swagger-jsdoc");
-const cookieParser = require("cookie-parser");
-const swaggerUi = require("swagger-ui-express");
-const { logger } = require("./middleware/logger");
-const corsOptions = require("./config/corsOptions");
-const connectMongoDb = require("./config/dbConnection");
-const errorMiddleware = require("./middleware/errorMiddleware");
+import dotenv from "dotenv";
+dotenv.config();
+import path from "path";
+import cors from "cors";
+import express from "express";
+import { fileURLToPath } from "url";
+import rootRoute from "./routes/root.js";
+import swaggerJsDoc from "swagger-jsdoc";
+import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import { logger } from "./middleware/logger.js";
+import corsOptions from "./config/corsOptions.js";
+import connectMongoDb from "./config/dbConnection.js";
+import errorMiddleware from "./middleware/errorMiddleware.js";
+import { getSwaggerOptions } from "./config/swaggerConfig.js";
 
-// auth Routes
-const authRoutes = require("./routes/auth.routes");
-const userRoutes = require("./routes/user.routes");
+// Routes
+import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5016;
@@ -21,30 +27,7 @@ const BASE_URL = process.env.API_BASE_URL || "/api/v1";
 
 connectMongoDb();
 
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "API Documentation",
-      version: "1.0.0",
-      description:
-        "This collection provides a structured set of API requests to interact with the Papaya Buddy mobile application's backend, built with Node.js and Express. The API facilitates disease identification, prediction history tracking, plant maturity stage management, and treatment recommendations.",
-      contact: {
-        name: "API Support",
-        email: "seprojectgroup123@gmail.com",
-      },
-    },
-    servers: [
-      {
-        url: `http://localhost:${PORT}${BASE_URL}`,
-        description: "Development server",
-      },
-    ],
-  },
-  apis: ["./routes/*.js", "./models/*.js", "./server.js"],
-};
-
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const swaggerDocs = swaggerJsDoc(getSwaggerOptions(PORT, BASE_URL));
 app.use(`${BASE_URL}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Middleware

@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   createUser,
   getAllUsers,
   getUserById,
@@ -8,8 +8,8 @@ const {
   getCurrentUserProfile,
   updateCurrentUserProfile,
   deleteUser,
-} = require("../controllers/user.controller");
-const { protect, authorizeRoles } = require("../middleware/authmiddleware");
+} from "../controllers/user.controller.js";
+import { protect, authorizeRoles } from "../middleware/authmiddleware.js";
 
 /**
  * @swagger
@@ -360,4 +360,4 @@ router.route("/:id").put(protect, authorizeRoles("admin"), updateUser);
  */
 router.route("/:id").delete(protect, authorizeRoles("admin"), deleteUser);
 
-module.exports = router;
+export default router;

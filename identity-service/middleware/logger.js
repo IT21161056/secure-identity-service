@@ -1,38 +1,44 @@
-const fs = require("fs");
-const path = require("path");
-const { v4: uuid } = require("uuid");
-const { format } = require("date-fns");
-const { promises: fsPromises } = require("fs");
+import fs from "fs";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+import { format } from "date-fns";
+import { promises as fsPromises } from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const logEvents = async (message, logFileName) => {
-  const dateTime = `${format(new Date(), "yyyy-MM-dd\tHH:mm:ss")}`;
-  const logItem = `${dateTime}\t${uuid()}\t${message}\n`;
+  const dateTime = format(new Date(), "yyyy-MM-dd\tHH:mm:ss");
+  const logItem = `${dateTime}\t${uuidv4()}\t${message}\n`;
 
   try {
     const logsDir = path.join(__dirname, "..", "logs");
+
     if (!fs.existsSync(logsDir)) {
-      await fsPromises.mkdir(logsDir);
+      await fsPromises.mkdir(logsDir, { recursive: true });
     }
+
     await fsPromises.appendFile(path.join(logsDir, logFileName), logItem);
   } catch (error) {
-    console.log(error);
+    console.error("Failed to log event:", error);
   }
 };
 
 const logger = (req, res, next) => {
-  const clientOrigin =
-    req.headers.origin || req.get("referer") || "direct-access";
-  const clientIP = req.ip || req.connection.remoteAddress;
+  const logMessage = [
+    req.method,
+    req.url,
+    req.headers.origin || req.get("referer") || "direct-access",
+    req.ip || req.connection.remoteAddress,
+    req.get("user-agent") || "unknown",
+  ].join("\t");
 
-  logEvents(
-    `${req.method}\t${req.url}\t${clientOrigin}\t${clientIP}`,
-    "reqLog.log"
-  );
+  logEvents(logMessage, "reqLog.log").catch((err) => {
+    console.error("Logging failed:", err);
+  });
 
   next();
 };
 
-module.exports = {
-  logger,
-  logEvents,
-};
+export { logger, logEvents };

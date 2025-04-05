@@ -1,5 +1,5 @@
-const asyncHandler = require("express-async-handler");
-const User = require("../models/user.model");
+import asyncHandler from "express-async-handler";
+import User from "../models/user.model.js";
 
 /**
  * @desc    Create a new user
@@ -298,7 +298,7 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
   createUser,
   getAllUsers,
   getUserById,

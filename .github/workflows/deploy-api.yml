@@ -30,14 +30,14 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd identity-service
+          cd {{ secrets.IMAGE_NAME }}
           ls -alh  # List files and directories to check if Dockerfile exists
-          docker build -t identityservice.azurecr.io/identity-service:latest .
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/identity-service:latest .
 
       - name: Push Docker image to ACR
         run: |
-          docker push identityservice.azurecr.io/identity-service:latest
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/{{ secrets.IMAGE_NAME }}:latest
 
       - name: Redeploy Azure Container Instance
         run: |
-          az container restart --name identity-service-container --resource-group resource-group-1
+          az container restart --name ${{ secrets.ACI_NAME }} --resource-group ${{ secretes.RESOURCE_GROUP }}

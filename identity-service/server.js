@@ -22,7 +22,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5016;
+const PORT = process.env.PORT || 5000;
 const BASE_URL = process.env.API_BASE_URL || "/api/v1";
 
 connectMongoDb();

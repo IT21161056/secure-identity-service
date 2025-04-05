@@ -16,7 +16,7 @@ const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 
 const app = express();
-const PORT = process.env.PORT || 5016;
+const PORT = process.env.PORT || 5000;
 const BASE_URL = process.env.API_BASE_URL || "/api/v1";
 
 connectMongoDb();

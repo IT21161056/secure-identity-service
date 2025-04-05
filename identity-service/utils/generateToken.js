@@ -1,8 +1,8 @@
-const jwt = require("jsonwebtoken");
-const {
+import jwt from "jsonwebtoken";
+import {
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
-} = require("./constants");
+} from "./constants.js";
 
 const createAccessToken = (user, token) => {
   return jwt.sign(
@@ -35,4 +35,4 @@ const createRefreshToken = (user, token) => {
   );
 };
 
-module.exports = { createAccessToken, createRefreshToken };
+export { createAccessToken, createRefreshToken };

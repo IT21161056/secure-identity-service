@@ -1,74 +1,76 @@
-name: Build and Deploy to Azure Container Instances
+# name: Build and Deploy to Azure Container Instances
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [development]
+# on:
 
-env:
-  RESOURCE_GROUP: your-resource-group
-  ACR_NAME: your-acr-name
-  ACI_NAME: your-aci-name
-  LOCATION: eastus # Change to your preferred region
+#   # push:
+#   #   branches: [main]
+#   # pull_request:
+#   #   branches: [development]
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment: production
+# env:
+#   RESOURCE_GROUP: resource_group_1
+#   ACR_NAME: secureAuth
+#   ACI_NAME: identity-service
+#   LOCATION: eastus
+#   CONTAINER_PORT: 5000 # Define your container's exposed port
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
+#     environment: production
 
-      # Login to Azure
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      # Build and push Docker image to ACR
-      - name: Build and push image to ACR
-        run: |
-          # Build the Docker image
-          docker build -t $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }} .
+#       # Login to Azure using the stored credentials
+#       - name: Azure Login
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-          # Login to ACR
-          az acr login --name $ACR_NAME
+#       # Build and push Docker image to ACR
+#       - name: Build and push image to ACR
+#         run: |
+#           # Build the Docker image
+#           docker build -t $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }} .
 
-          # Push the image
-          docker push $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }}
+#           # Login to ACR using Azure CLI (already logged in via azure/login)
+#           az acr login --name $ACR_NAME
 
-      # Deploy to Azure Container Instances
-      - name: Deploy to Azure Container Instances
-        run: |
-          # Check if container instance exists
-          if az container show --resource-group $RESOURCE_GROUP --name $ACI_NAME --query name -o tsv; then
-            # Update existing container
-            az container update \
-              --resource-group $RESOURCE_GROUP \
-              --name $ACI_NAME \
-              --image $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }}
-          else
-            # Create new container instance
-            az container create \
-              --resource-group $RESOURCE_GROUP \
-              --name $ACI_NAME \
-              --image $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }} \
-              --cpu 1 \
-              --memory 1.5 \
-              --ports 5000 \
-              --dns-name-label $ACI_NAME \
-              --registry-login-server $ACR_NAME.azurecr.io \
-              --registry-username ${{ secrets.ACR_USERNAME }} \
-              --registry-password ${{ secrets.ACR_PASSWORD }} \
-              --environment-variables \
-                NODE_ENV="production" \
-                PORT="5000" \
-                API_BASE_URL="/api/v1" \
-              --secure-environment-variables \
-                MONGO_URL="${{ secrets.MONGO_URL }}" \
-                JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-                ACCESS_TOKEN_SECRET="${{ secrets.ACCESS_TOKEN_SECRET }}" \
-                REFRESH_TOKEN_SECRET="${{ secrets.REFRESH_TOKEN_SECRET }}"
-          fi
+#           # Push the image to ACR
+#           docker push $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }}
+
+#       # Deploy to Azure Container Instances
+#       - name: Deploy to Azure Container Instances
+#         run: |
+#           # Check if the container instance exists
+#           if az container show --resource-group $RESOURCE_GROUP --name $ACI_NAME --query name -o tsv; then
+#             echo "Container instance '$ACI_NAME' exists. Updating..."
+#             az container update \
+#               --resource-group $RESOURCE_GROUP \
+#               --name $ACI_NAME \
+#               --image $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }}
+#           else
+#             echo "Container instance '$ACI_NAME' does not exist. Creating..."
+#             az container create \
+#               --resource-group $RESOURCE_GROUP \
+#               --name $ACI_NAME \
+#               --image $ACR_NAME.azurecr.io/$ACI_NAME:${{ github.sha }} \
+#               --cpu 1 \
+#               --memory 1.5 \
+#               --ports ${{ env.CONTAINER_PORT }} \
+#               --dns-name-label $ACI_NAME # This will create a public DNS name
+#               --registry-login-server $ACR_NAME.azurecr.io \
+#               --registry-username ${{ secrets.ACR_USERNAME }} \
+#               --registry-password ${{ secrets.ACR_PASSWORD }} \
+#               --environment-variables \
+#                 NODE_ENV="production" \
+#                 PORT="${{ env.CONTAINER_PORT }}" \
+#                 API_BASE_URL="/api/v1" \
+#               --secure-environment-variables \
+#                 MONGO_URL="${{ secrets.MONGO_URL }}" \
+#                 JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+#                 ACCESS_TOKEN_SECRET="${{ secrets.ACCESS_TOKEN_SECRET }}" \
+#                 REFRESH_TOKEN_SECRET="${{ secrets.REFRESH_TOKEN_SECRET }}"
+#           fi

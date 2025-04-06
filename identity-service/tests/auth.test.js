@@ -1,7 +1,7 @@
-import { login, refresh, logout } from "../../controllers/auth.controller.js";
-import User from "../../models/user.model.js";
+import { login, refresh, logout } from "../controllers/auth.controller.js";
+import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import * as generateToken from "../../utils/generateToken.js";
+import * as generateToken from "../utils/generateToken.js";
 
 // Mock dependencies
 jest.mock("../../models/user.model.js");

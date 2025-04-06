@@ -2,10 +2,7 @@ import {
   createUser,
   getAllUsers,
   getUserById,
-  updateUser,
   deleteUser,
-  getCurrentUserProfile,
-  updateCurrentUserProfile,
 } from "../../controllers/user.controller.js";
 import User from "../../models/user.model.js";
 

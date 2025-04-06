@@ -2,18 +2,18 @@ name: SonarCloud Scan
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [development]
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  sonarcloud:
+  sonarqube:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./identity-service
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Shallow clones should be disabled
 
@@ -29,8 +29,8 @@ jobs:
         run: |
           npm test
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

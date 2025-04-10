@@ -17,6 +17,8 @@ import { getSwaggerOptions } from "./config/swaggerConfig.js";
 // Routes
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import courseRoutes from "./routes/course.routes.js";
+import contentRoutes from "./routes/content.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,8 +36,8 @@ app.use(`${BASE_URL}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(logger);
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+// app.use(cors(corsOptions));
+// app.options("*", cors(corsOptions));
 
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
@@ -85,6 +87,8 @@ app.get(`${BASE_URL}`, (req, res) => {
 // Endpoints
 app.use(`${BASE_URL}/auth`, authRoutes);
 app.use(`${BASE_URL}/user`, userRoutes);
+app.use(`${BASE_URL}/course`, courseRoutes);
+app.use(`${BASE_URL}/content`, contentRoutes);
 
 app.all("*", (req, res) => {
   res.status(404);

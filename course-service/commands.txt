@@ -1,0 +1,17 @@
+docker run --env-file .env -p 5000:5000 your-docker-username/course-service:latest
+
+
+sonar token 
+key - GitHub Actions Token 
+value - 97ae362ea45fd346a9b89a7463593611b0b61d95
+
+Azure CMDS to push docker image to ACR
+
+    az login
+
+    az account set --subscription "Azure for Courses"
+    az acr login --name secureAuth
+    docker tag course-service:latest secureauth.azurecr.io/course-service:v1
+    docker push secureauth.azurecr.io/course-service:v1
+    az acr update --name secureAuth --admin-enabled true
+    az acr credential show --name secureAuth --query "{username:username, password:passwords[0].value}" --output table

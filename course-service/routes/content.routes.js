@@ -4,8 +4,9 @@ import {
   addContent,
   getAllContent,
 } from "../controllers/content.controller.js";
+import upload from "../middleware/multer.js";
 
-router.route("/").post(addContent);
-router.route("/").get(getAllContent);
+router.post("/", upload.single("video"), addContent);
+router.get("/", getAllContent);
 
 export default router;

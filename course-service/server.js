@@ -12,11 +12,9 @@ import { logger } from "./middleware/logger.js";
 import corsOptions from "./config/corsOptions.js";
 import connectMongoDb from "./config/dbConnection.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
-import { getSwaggerOptions } from "./config/swaggerConfig.js";
+// import { getSwaggerOptions } from "./config/swaggerConfig.js";
 
 // Routes
-import authRoutes from "./routes/auth.routes.js";
-import userRoutes from "./routes/user.routes.js";
 import courseRoutes from "./routes/course.routes.js";
 import contentRoutes from "./routes/content.routes.js";
 
@@ -24,20 +22,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5050;
 const BASE_URL = process.env.API_BASE_URL || "/api/v1";
 
 connectMongoDb();
 
-const swaggerDocs = swaggerJsDoc(getSwaggerOptions(PORT, BASE_URL));
-app.use(`${BASE_URL}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// const swaggerDocs = swaggerJsDoc(getSwaggerOptions(PORT, BASE_URL));
+// app.use(`${BASE_URL}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Middleware
 app.use(logger);
 app.use(cookieParser());
 app.use(express.json());
-// app.use(cors(corsOptions));
-// app.options("*", cors(corsOptions));
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
@@ -48,35 +46,6 @@ app.use((req, res, next) => {
 app.use("/", express.static(path.join(__dirname, "public")));
 app.use("/", rootRoute);
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     ApiResponse:
- *       type: object
- *       properties:
- *         status:
- *           type: string
- *           example: success
- *         message:
- *           type: string
- *           example: API is running
- */
-
-/**
- * @swagger
- * /:
- *   get:
- *     summary: Check if API is running
- *     tags: [API Status]
- *     responses:
- *       200:
- *         description: API status
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- */
 app.get(`${BASE_URL}`, (req, res) => {
   res.json({
     status: "success",
@@ -85,8 +54,6 @@ app.get(`${BASE_URL}`, (req, res) => {
 });
 
 // Endpoints
-app.use(`${BASE_URL}/auth`, authRoutes);
-app.use(`${BASE_URL}/user`, userRoutes);
 app.use(`${BASE_URL}/course`, courseRoutes);
 app.use(`${BASE_URL}/content`, contentRoutes);
 

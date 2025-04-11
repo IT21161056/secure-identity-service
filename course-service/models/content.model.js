@@ -21,6 +21,7 @@ const ContentSchema = new Schema(
     source: {
       type: String,
     },
+
     courseId: { type: Schema.Types.ObjectId, ref: "Course" },
   },
   { timestamps: true }

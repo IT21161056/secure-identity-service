@@ -96,7 +96,7 @@ import {
 
 /**
  * @swagger
- * /schedules:
+ * /:
  *   post:
  *     summary: Create a new schedule
  *     tags: [Schedules]
@@ -178,11 +178,11 @@ router.route("/").post(createSchedule);
  *       500:
  *         description: Server error
  */
-router.route("/").get(getAllSchedules);
+router.route("/schedules").get(getAllSchedules);
 
 /**
  * @swagger
- * /schedules/{id}:
+ * /{id}:
  *   get:
  *     summary: Get schedule by ID
  *     tags: [Schedules]
@@ -213,7 +213,7 @@ router.route("/:id").get(getSchedule);
 
 /**
  * @swagger
- * /schedules/{id}:
+ * /{id}:
  *   put:
  *     summary: Update schedule by ID
  *     tags: [Schedules]
@@ -252,7 +252,7 @@ router.route("/:id").put(updateSchedule);
 
 /**
  * @swagger
- * /schedules/{id}:
+ * /{id}:
  *   delete:
  *     summary: Delete schedule by ID
  *     tags: [Schedules]

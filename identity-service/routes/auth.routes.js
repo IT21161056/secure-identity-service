@@ -18,10 +18,10 @@ import { login, refresh, logout } from "../controllers/auth.controller.js";
  *     LoginCredentials:
  *       type: object
  *       required:
- *         - username
+ *         - email
  *         - password
  *       properties:
- *         username:
+ *         email:
  *           type: string
  *           example: john_doe
  *         password:

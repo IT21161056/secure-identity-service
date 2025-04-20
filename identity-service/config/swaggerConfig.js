@@ -66,7 +66,7 @@ This API provides **secure identity management** for academic institutions with:
         description: "Development Server",
       },
       {
-        url: `https://your-production-url.com${BASE_URL}`,
+        url: `http://52.136.38.68:5000${BASE_URL}`,
         description: "Production Server",
       },
     ],

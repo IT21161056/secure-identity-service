@@ -28,7 +28,13 @@ const BASE_URL = process.env.API_BASE_URL || "/api/v1";
 connectMongoDb();
 
 const swaggerDocs = swaggerJsDoc(getSwaggerOptions(PORT, BASE_URL));
-app.use(`${BASE_URL}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+if (
+  process.env.NODE_ENV !== "production" ||
+  process.env.ALLOW_SWAGGER === "true"
+) {
+  app.use(`${BASE_URL}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+}
 
 // Middleware
 app.use(logger);

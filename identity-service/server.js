@@ -29,11 +29,21 @@ connectMongoDb();
 
 const swaggerDocs = swaggerJsDoc(getSwaggerOptions(PORT, BASE_URL));
 
+const swaggerAuth = basicAuth({
+  users: { admin: "admin123" },
+  challenge: true,
+});
+
 if (
   process.env.NODE_ENV !== "production" ||
   process.env.ALLOW_SWAGGER === "true"
 ) {
-  app.use(`${BASE_URL}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  app.use(
+    `${BASE_URL}/docs`,
+    swaggerAuth,
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocs)
+  );
 }
 
 // Middleware

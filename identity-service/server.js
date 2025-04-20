@@ -90,7 +90,7 @@ app.get(`${BASE_URL}`, (req, res) => {
 
 // Endpoints
 app.use(`${BASE_URL}/auth`, authRoutes);
-app.use(`${BASE_URL}/user`, userRoutes);
+app.use(`${BASE_URL}/users`, userRoutes);
 
 app.all("*", (req, res) => {
   res.status(404);

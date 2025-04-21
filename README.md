@@ -19,7 +19,7 @@ This project is a secure, containerized **Authentication Microservice** develope
 
 ## 🧱 Architecture Overview
 
-![Architecture Diagram](./architecture.png)
+![Architecture Diagram](https://github.com/user-attachments/assets/606c61ff-67ca-4bda-994f-796e12d88984)
 
 - **Client**: Web or Postman
 - **API Gateway**: Kong (routes requests to microservices)
@@ -28,7 +28,6 @@ This project is a secure, containerized **Authentication Microservice** develope
 - **Deployment**: Azure Container Apps hosting the microservice
 - **Security**: JWT, bcrypt, role-based access, environment-based secrets
 
----
 
 ## 📂 API Endpoints
 

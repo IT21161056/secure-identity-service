@@ -8,6 +8,7 @@ import rootRoute from "./routes/root.js";
 import swaggerJsDoc from "swagger-jsdoc";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
+import basicAuth from "express-basic-auth";
 import { logger } from "./middleware/logger.js";
 import corsOptions from "./config/corsOptions.js";
 import connectMongoDb from "./config/dbConnection.js";

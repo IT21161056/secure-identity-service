@@ -51,8 +51,8 @@ if (
 app.use(logger);
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.use(cors("*"));
+// app.options("*", cors(corsOptions));
 
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();

@@ -27,4 +27,6 @@ const ContentSchema = new Schema(
   { timestamps: true }
 );
 
+// Compile model from schema
+
 export default model("Content", ContentSchema);
